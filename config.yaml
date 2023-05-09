@@ -1,0 +1,26 @@
+backup_directory: /server-backup
+docker-pre-backup-commands: &docker-pre-backup
+    - sudo systemctl stop docker
+    - sudo systemctl disable docker
+    - sudo systemctl stop docker.socket
+    - sudo systemctl disable docker.socket
+docker-post-backup-commands: &docker-post-backup
+    - sudo systemctl enable docker
+    - sudo systemctl start docker
+    - sudo systemctl enable docker.socket
+    - sudo systemctl start docker.socket
+# "zip", "tar", "gztar", "bztar"
+archive_format: gztar
+locations:
+  - path: /var/lib/docker/volumes
+    pre_backup: *docker-pre-backup
+    post_backup: *docker-post-backup
+  - path: /opt
+    pre_backup: *docker-pre-backup
+    post_backup: *docker-post-backup
+  - path: /etc
+  - path: /root
+  - path: /home
+outputs:
+  - command: apt-mark showmanual
+    name: manually-installed-packages
